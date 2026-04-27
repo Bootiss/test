@@ -1,0 +1,24 @@
+image: $CI_BUILD_IMAGE
+stages:
+  - build
+
+.base_job: &base_job
+  before_script:
+    - export GRADLE_USER_HOME=$(pwd)/.gradle
+    - chmod +x ./gradlew
+
+build:
+  <<: *base_job
+  stage: build
+  script:
+    - ./gradlew assembleDebug
+
+debugTests:
+  <<: *base_job
+  stage: build
+  script:
+    - ./gradlew clean
+    - ./gradlew jacocoUnitTestReport
+    - export COVER_VAR=$(./gradlew -q printTotalUTCoverage)
+    - echo "UT Coverage:$COVER_VAR"
+  coverage: '/UT Coverage:(\d+\.?\d*)/'
